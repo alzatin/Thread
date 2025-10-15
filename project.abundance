@@ -18,17 +18,19 @@
     {
       "atomType": "Code",
       "name": "Code",
-      "x": 0.5516917293233082,
-      "y": 0.5217391304347826,
+      "x": 0.5535714285714286,
+      "y": 0.3012422360248447,
       "uniqueID": "9a0d8f13-2df4-462b-8f65-74d0b9ccf9e5",
       "ioValues": [
         {
           "name": "pitch",
-          "ioValue": 1.5
+          "ioValue": 1.5,
+          "currentEquation": "1.5"
         },
         {
           "name": "threadLength",
-          "ioValue": 12
+          "ioValue": 15,
+          "currentEquation": "15"
         },
         {
           "name": "diameter",
@@ -40,12 +42,12 @@
         }
       ],
       "codeVersion": 1,
-      "code": "// Threaded cylinder example for Replicad (JS Code Atom)\n//\n// Inputs:\n// - pitch: axial distance per turn (mm)\n// - threadLength: axial length of the threaded zone (mm)\n// - diameter: major diameter of the cylinder (mm)\n// - threadDepth: approximate thread depth (mm)\n// - external: true => external thread (added/fused), false => internal (subtracted/cut)\n\nconst Inputs = [\n  \n  { inputName: \"cyl\", type: \"geometry\", defaultValue: null },\n  { inputName: \"pitch\", type: \"number\", defaultValue: 1.5 },\n  { inputName: \"threadLength\", type: \"number\", defaultValue: 12 },\n  { inputName: \"diameter\", type: \"number\", defaultValue: 10 },\n  { inputName: \"threadDepth\", type: \"number\", defaultValue: 0.9 },\n  { inputName: \"external\", type: \"boolean\", defaultValue: true }\n]\n\n  // Derived values\n  const P = pitch;\n  const L = threadLength;\n  const D = diameter;\n  const depth = threadDepth;\n\n  // Helix radius:\n  // - For external threads place helix at the major radius (D/2)\n  // - For internal threads place helix inside the cylinder (D/2 - depth)\n  const helixRadius = external ? D / 2 : (D / 2 - depth);\n\n  // 1) Create base cylinder (centered on origin, height = L)\n  const cylinder = library[cyl]\n\n  // 2) Create helix sketch: pitch, height, radius\n  // sketchHelix returns a Sketch which exposes sweepSketch()\n  const helix = replicad.sketchHelix(P, L, helixRadius);\n\n  // 3) Profile callback: given (plane, origin) return a Sketch for the thread profile.\n  // Coordinates in the profile's local plane: X points outward from the helix,\n  // Y is lateral across the tooth base. We draw a simple triangular profile here.\n  const profileCallback = (plane, origin) => {\n    const baseWidth = P * 0.8; // adjust as needed\n    const halfBase = baseWidth / 2;\n\n    // The triangle is drawn so its inner edge sits at X=0 and the tip points toward +X\n    return replicad.draw()\n      .movePointerTo([0, -halfBase])\n      .lineTo([depth, 0])\n      .lineTo([0, halfBase])\n      .close()\n      .sketchOnPlane(plane, origin);\n  };\n\n  // 4) Sweep the profile along the helix to create the thread solid\n  const sweepConfig = {\n    frenet: true,\n    forceProfileSpineOthogonality: true\n  };\n\n  const threadSolid = helix.sweepSketch(profileCallback, sweepConfig);\n\n  // 5) Combine with the cylinder: external => add (fuse/union), internal => subtract (cut)\n  let result;\n  try {\n    if (external) {\n      // prefer fuse/union; try a few common names\n      if (typeof cylinder.fuse === \"function\") {\n        result = cylinder.fuse(threadSolid);\n      } else if (typeof cylinder.union === \"function\") {\n        result = cylinder.union(threadSolid);\n      } else if (typeof cylinder.join === \"function\") {\n        result = cylinder.join(threadSolid);\n      } else {\n        // last resort: return both as an assembly if boolean-add is unavailable\n        // (replace with the correct boolean-add method if you find it in your env)\n        result = cylinder;\n        console.warn(\"No fuse/union method found; returning the cylinder. Replace with the correct boolean-add call in your environment.\");\n      }\n    } else {\n      // internal thread: subtract swept volume from cylinder\n      if (typeof cylinder.cut === \"function\") {\n        result = cylinder.cut(threadSolid);\n      } else if (typeof cylinder.subtract === \"function\") {\n        result = cylinder.subtract(threadSolid);\n      } else {\n        result = cylinder;\n        console.warn(\"No cut/subtract method found; returning the cylinder. Replace with the correct boolean-subtract call in your environment.\");\n      }\n    }\n  } catch (e) {\n    // If boolean operation fails, return the swept thread and cylinder separately for debugging\n    console.warn(\"Boolean operation failed:\", e);\n    return { cylinder, threadSolid };\n  }\n console.log(result)\n\n      const newPlane = new replicad.Plane().pivot(0, 'Y')\n   //Wrap the raw replicad geometry in our assembly format\n      let shape2 = {\n          geometry: [result],\n          dimension: \"3D\",\n          tags: [\"createdShape\"],\n          color: '#A3CE5B',\n          plane: newPlane,\n          bom: []\n      }\n\n  return shape2;\n\n\n     \n\n  \n\n      /**\n      Built-in Functions Available:\n      - Move(geometry, x, y, z) - Move a shape in 3D space\n      - Rotate(geometry, x, y, z) - Rotate a shape around X, Y, Z axes (degrees)\n      - Scale(geometry, factor) - Scale a shape by a factor\n      - Assembly([shapes]) - Combine multiple shapes into an assembly\n      - Intersect(shape1, shape2) - Boolean intersection of two shapes\n      - GetBounds(geometry) - Get the bounding box of a shape\n      - Fillet(geometry, radius) - Round edges with specified radius\n      - Chamfer(geometry, size) - Bevel edges with specified size\n\n      To Use the Code Atom, enter your inputs to the input list as an object array:\n      const Inputs = [\n        {inputName: \"shape\", type: \"geometry\", defaultValue: null},\n        {inputName: \"dist\", type: \"number\", defaultValue: 5},\n        {inputName: \"height\", type: \"number\", defaultValue: 10}\n      ]\n\n      Access imported geometry using library[inputName] - the built-in functions handle \n      the complexity of accessing geometry arrays and maintaining metadata automatically.\n\n      Simple Example - Move a shape:\n         const Inputs = [\n          {inputName: \"shape\", type: \"geometry\", defaultValue: null},\n          {inputName: \"x\", type: \"number\", defaultValue: 5}\n        ]\n        let movedShape = await Move(library[shape], x, 0, 0)\n        return movedShape\n      */\n      "
+      "code": "// Threaded cylinder example for Replicad (JS Code Atom)\n//\n// Inputs:\n// - pitch: axial distance per turn (mm)\n// - threadLength: axial length of the threaded zone (mm)\n// - diameter: major diameter of the cylinder (mm)\n// - threadDepth: approximate thread depth (mm)\n// - external: true => external thread (added/fused), false => internal (subtracted/cut)\n\nconst Inputs = [\n  \n  { inputName: \"cyl\", type: \"geometry\", defaultValue: null },\n  { inputName: \"pitch\", type: \"number\", defaultValue: 1.5 },\n  { inputName: \"threadLength\", type: \"number\", defaultValue: 12 },\n  { inputName: \"diameter\", type: \"number\", defaultValue: 10 },\n  { inputName: \"threadDepth\", type: \"number\", defaultValue: 0.9 },\n  { inputName: \"external\", type: \"boolean\", defaultValue: true }\n]\n\n  // Derived values\n  const P = pitch;\n  const L = threadLength;\n  const D = diameter;\n  const depth = threadDepth;\n\n  // Helix radius:\n  // - For external threads place helix at the major radius (D/2)\n  // - For internal threads place helix inside the cylinder (D/2 - depth)\n  const helixRadius = external ? D / 2 : (D / 2 - depth);\n\n  // 1) Create base cylinder (centered on origin, height = L)\n  const cylinder = library[cyl]\n\n  // 2) Create helix sketch: pitch, height, radius\n  // sketchHelix returns a Sketch which exposes sweepSketch()\n  const helix = replicad.sketchHelix(P, L, helixRadius);\n\n  // 3) Profile callback: given (plane, origin) return a Sketch for the thread profile.\n  // Coordinates in the profile's local plane: X points outward from the helix,\n  // Y is lateral across the tooth base. We draw a simple triangular profile here.\n  const profileCallback = (plane, origin) => {\n    const baseWidth = P * 0.8; // adjust as needed\n    const halfBase = baseWidth / 2;\n\n    // The triangle is drawn so its inner edge sits at X=0 and the tip points toward +X\n    return replicad.draw()\n      .movePointerTo([0, -halfBase])\n      .lineTo([depth, 0])\n      .lineTo([0, halfBase])\n      .close()\n      .sketchOnPlane(plane, origin);\n  };\n\n  // 4) Sweep the profile along the helix to create the thread solid\n  const sweepConfig = {\n    frenet: true,\n    forceProfileSpineOthogonality: true\n  };\n\n  const threadSolid = helix.sweepSketch(profileCallback, sweepConfig);\n\n \n      const newPlane = new replicad.Plane().pivot(0, 'Y')\n   //Wrap the raw replicad geometry in our assembly format\n      let shape2 = {\n          geometry: [threadSolid],\n          dimension: \"3D\",\n          tags: [\"createdShape\"],\n          color: '#A3CE5B',\n          plane: newPlane,\n          bom: []\n      }\n\n  return shape2;\n\n\n     \n\n  \n\n      /**\n      Built-in Functions Available:\n      - Move(geometry, x, y, z) - Move a shape in 3D space\n      - Rotate(geometry, x, y, z) - Rotate a shape around X, Y, Z axes (degrees)\n      - Scale(geometry, factor) - Scale a shape by a factor\n      - Assembly([shapes]) - Combine multiple shapes into an assembly\n      - Intersect(shape1, shape2) - Boolean intersection of two shapes\n      - GetBounds(geometry) - Get the bounding box of a shape\n      - Fillet(geometry, radius) - Round edges with specified radius\n      - Chamfer(geometry, size) - Bevel edges with specified size\n\n      To Use the Code Atom, enter your inputs to the input list as an object array:\n      const Inputs = [\n        {inputName: \"shape\", type: \"geometry\", defaultValue: null},\n        {inputName: \"dist\", type: \"number\", defaultValue: 5},\n        {inputName: \"height\", type: \"number\", defaultValue: 10}\n      ]\n\n      Access imported geometry using library[inputName] - the built-in functions handle \n      the complexity of accessing geometry arrays and maintaining metadata automatically.\n\n      Simple Example - Move a shape:\n         const Inputs = [\n          {inputName: \"shape\", type: \"geometry\", defaultValue: null},\n          {inputName: \"x\", type: \"number\", defaultValue: 5}\n        ]\n        let movedShape = await Move(library[shape], x, 0, 0)\n        return movedShape\n      */\n      "
     },
     {
       "atomType": "Code",
       "name": "Code",
-      "x": 0.2791353383458646,
+      "x": 0.2716165413533835,
       "y": 0.6708074534161491,
       "uniqueID": "4c512958-7902-4eef-b049-8e28f72aca67",
       "ioValues": [
@@ -77,8 +79,8 @@
     {
       "atomType": "Extrude",
       "name": "Extrude",
-      "x": 0.3106312292358804,
-      "y": 0.3695652173913043,
+      "x": 0.31390977443609025,
+      "y": 0.40372670807453415,
       "uniqueID": "045d5afb-40d8-4b6e-b499-a15c60a13b3e",
       "ioValues": [
         {
@@ -86,9 +88,152 @@
           "ioValue": 10
         }
       ]
+    },
+    {
+      "atomType": "Fusion",
+      "name": "Fusion",
+      "x": 0.618421052631579,
+      "y": 0.7701863354037267,
+      "uniqueID": "68874950-39e7-43a9-ad03-fae672b47f23",
+      "ioValues": [
+        {
+          "name": "Shape 1",
+          "ioValue": {
+            "geometry": "singular-46b1884167c4edd308bcf0c04163dd02d05c9742b35e86b57b5f7ed1b82f3850",
+            "dimension": "3D",
+            "tags": [
+              "createdShape"
+            ],
+            "color": "#A3CE5B",
+            "plane": {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "xDir": [
+                1,
+                0,
+                0
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ]
+            },
+            "bom": []
+          }
+        },
+        {
+          "name": "Shape 2",
+          "ioValue": {
+            "geometry": "extrude-a481ec58c9a7c784daf9749cbb35b147247c21436ae4673c2ae0b9ca95ecc7de",
+            "dimension": "3D",
+            "tags": [],
+            "plane": {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "xDir": [
+                1,
+                0,
+                0
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ]
+            },
+            "color": "#aad7f2",
+            "bom": []
+          }
+        }
+      ],
+      "unionType": "Fusion"
+    },
+    {
+      "atomType": "Assembly",
+      "name": "Assembly",
+      "x": 0.7133458646616541,
+      "y": 0.5248447204968945,
+      "uniqueID": "337dd859-d479-416f-b534-9fca9e430244",
+      "ioValues": [
+        {
+          "name": "Shape 1",
+          "ioValue": {
+            "geometry": "extrude-a481ec58c9a7c784daf9749cbb35b147247c21436ae4673c2ae0b9ca95ecc7de",
+            "dimension": "3D",
+            "tags": [],
+            "plane": {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "xDir": [
+                1,
+                0,
+                0
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ]
+            },
+            "color": "#aad7f2",
+            "bom": []
+          }
+        },
+        {
+          "name": "Shape 3",
+          "ioValue": {
+            "geometry": "singular-46b1884167c4edd308bcf0c04163dd02d05c9742b35e86b57b5f7ed1b82f3850",
+            "dimension": "3D",
+            "tags": [
+              "createdShape"
+            ],
+            "color": "#A3CE5B",
+            "plane": {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "xDir": [
+                1,
+                0,
+                0
+              ],
+              "normal": [
+                0,
+                0,
+                1
+              ]
+            },
+            "bom": []
+          }
+        }
+      ]
     }
   ],
   "allConnectors": [
+    {
+      "ap1Name": "output",
+      "ap2Name": "Shape 1",
+      "ap1ID": "9a0d8f13-2df4-462b-8f65-74d0b9ccf9e5",
+      "ap2ID": "68874950-39e7-43a9-ad03-fae672b47f23"
+    },
+    {
+      "ap1Name": "output",
+      "ap2Name": "Shape 3",
+      "ap1ID": "9a0d8f13-2df4-462b-8f65-74d0b9ccf9e5",
+      "ap2ID": "337dd859-d479-416f-b534-9fca9e430244"
+    },
     {
       "ap1Name": "geometry",
       "ap2Name": "geometry",
@@ -100,6 +245,18 @@
       "ap2Name": "cyl",
       "ap1ID": "045d5afb-40d8-4b6e-b499-a15c60a13b3e",
       "ap2ID": "9a0d8f13-2df4-462b-8f65-74d0b9ccf9e5"
+    },
+    {
+      "ap1Name": "geometry",
+      "ap2Name": "Shape 2",
+      "ap1ID": "045d5afb-40d8-4b6e-b499-a15c60a13b3e",
+      "ap2ID": "68874950-39e7-43a9-ad03-fae672b47f23"
+    },
+    {
+      "ap1Name": "geometry",
+      "ap2Name": "Shape 1",
+      "ap1ID": "045d5afb-40d8-4b6e-b499-a15c60a13b3e",
+      "ap2ID": "337dd859-d479-416f-b534-9fca9e430244"
     }
   ],
   "unitsKey": "MM",
