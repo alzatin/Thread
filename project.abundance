@@ -23,29 +23,25 @@
     {
       "atomType": "Code",
       "name": "Code",
-      "x": 0.5169172932330827,
-      "y": 0.36024844720496896,
+      "x": 0.5225563909774436,
+      "y": 0.40372670807453415,
       "uniqueID": "9a0d8f13-2df4-462b-8f65-74d0b9ccf9e5",
       "ioValues": [
         {
           "name": "pitch",
-          "ioValue": 1.5,
-          "currentEquation": "1.5"
+          "ioValue": 1.5
         },
         {
           "name": "threadLength",
-          "ioValue": 11,
-          "currentEquation": "11"
+          "ioValue": 11
         },
         {
           "name": "diameter",
-          "ioValue": 10,
-          "currentEquation": "11.5"
+          "ioValue": 10
         },
         {
           "name": "threadDepth",
-          "ioValue": 0.9,
-          "currentEquation": "0.9"
+          "ioValue": 0.9
         }
       ],
       "codeVersion": 1,
@@ -60,22 +56,20 @@
       "ioValues": [
         {
           "name": "diameter",
-          "ioValue": 10,
-          "currentEquation": "11.5"
+          "ioValue": 10
         }
       ]
     },
     {
       "atomType": "Extrude",
       "name": "Extrude",
-      "x": 0.3543233082706767,
-      "y": 0.2981366459627329,
+      "x": 0.3505639097744361,
+      "y": 0.5124223602484472,
       "uniqueID": "045d5afb-40d8-4b6e-b499-a15c60a13b3e",
       "ioValues": [
         {
           "name": "height",
-          "ioValue": 20,
-          "currentEquation": "20"
+          "ioValue": 20
         }
       ]
     },
@@ -89,7 +83,7 @@
         {
           "name": "Shape 1",
           "ioValue": {
-            "geometry": "singular-95bce61a71a78185f4b6f8f25fc6986108043727fe9d9c19dbe44b0081ef928a",
+            "geometry": "singular-038966de9f6b9a901b20b4c6ca8b2a46009feebe031babc842d43690c0bc222b",
             "dimension": "3D",
             "tags": [
               "createdShape"
@@ -154,22 +148,20 @@
       "ioValues": [
         {
           "name": "diameter",
-          "ioValue": 11.6,
-          "currentEquation": "11.6"
+          "ioValue": 11.6
         }
       ]
     },
     {
       "atomType": "Extrude",
       "name": "Extrude",
-      "x": 0.4586466165413534,
-      "y": 0.7608695652173914,
+      "x": 0.43703007518796994,
+      "y": 0.7236024844720497,
       "uniqueID": "3a925871-23fd-47e4-a784-fb68543a64d0",
       "ioValues": [
         {
           "name": "height",
-          "ioValue": 12.5,
-          "currentEquation": "12.5"
+          "ioValue": 12.5
         }
       ]
     },
@@ -177,7 +169,7 @@
       "atomType": "Input",
       "name": "diameter",
       "x": 0.033,
-      "y": 0.46583850931677023,
+      "y": 0.2,
       "uniqueID": "dcb207c0-1f86-47db-9d71-56cc037d7976",
       "ioValues": [],
       "type": "number"
