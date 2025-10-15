@@ -1,0 +1,15 @@
+{
+    "atomType": "Molecule",
+    "name": "tap",
+    "x": 0,
+    "y": 0,
+    "uniqueID": "159269a3-b6a9-4ee8-837e-1a5fa0274616",
+    "ioValues": [],
+    "topLevel": true,
+    "allAtoms": [],
+    "allConnectors": [],
+    "unitsKey": "MM",
+    "fileTypeVersion": 1,
+    "compiledBom": {},
+    "filetypeVersion": 1
+}
